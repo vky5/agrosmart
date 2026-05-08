@@ -1,6 +1,6 @@
 """
 app.py  —  AgroSmart AI  |  Streamlit Frontend
-It runs with:  streamlit run frontend/app.py
+It runs with:  streamlit run src/frontend/app.py
 Set AGROSMART_API_BASE_URL to backend API origin.
 """
 
@@ -11,47 +11,47 @@ from mock_data import PRESETS
 from services.api_client import ApiClientError, chat, predict_crop
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PAGE CONFIG  (must be first Streamlit call)
+# PAGE CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title  = "AgroSmart AI",
-    page_icon   = "🌾",
+    page_icon   = "AgroSmart",
     layout      = "wide",
     initial_sidebar_state = "expanded",
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# GLOBAL CSS  —  Dark earthy-green theme, premium feel
+# GLOBAL CSS  —  Clean, Minimalist, Premium Theme
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 /* ── Google Fonts ── */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ── Root palette ── */
 :root {
-  --bg:          #0d1117;
-  --surface:     #161c24;
-  --surface2:    #1e2a1e;
-  --green:       #4ade80;
-  --green-dim:   #166534;
-  --amber:       #fbbf24;
-  --sky:         #38bdf8;
-  --red:         #f87171;
-  --text:        #e2e8f0;
-  --text-muted:  #64748b;
-  --border:      #2d3748;
-  --radius:      14px;
+  --bg:          #0f172a;
+  --surface:     #1e293b;
+  --surface2:    #334155;
+  --primary:     #10b981;
+  --primary-dim: #065f46;
+  --amber:       #f59e0b;
+  --sky:         #0ea5e9;
+  --red:         #ef4444;
+  --text:        #f8fafc;
+  --text-muted:  #94a3b8;
+  --border:      #334155;
+  --radius:      8px;
 }
 
 /* ── Base ── */
 html, body, [data-testid="stAppViewContainer"] {
   background: var(--bg) !important;
   color: var(--text) !important;
-  font-family: 'DM Sans', sans-serif !important;
+  font-family: 'Inter', sans-serif !important;
 }
 [data-testid="stSidebar"] {
-  background: var(--surface) !important;
+  background: var(--bg) !important;
   border-right: 1px solid var(--border) !important;
 }
 [data-testid="stHeader"] { background: transparent !important; }
@@ -62,16 +62,15 @@ html, body, [data-testid="stAppViewContainer"] {
 /* ── Sidebar labels ── */
 [data-testid="stSidebar"] label,
 [data-testid="stSidebar"] .stMarkdown p {
-  color: #94a3b8 !important;
-  font-size: 0.78rem !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase !important;
+  color: var(--text-muted) !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.05em !important;
   font-weight: 500 !important;
 }
 
 /* ── Sliders ── */
 [data-testid="stSlider"] > div > div > div > div {
-  background: var(--green) !important;
+  background: var(--primary) !important;
 }
 [data-testid="stSlider"] [data-testid="stTickBar"] { display: none; }
 
@@ -80,35 +79,39 @@ html, body, [data-testid="stAppViewContainer"] {
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
   color: var(--text) !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius) !important;
 }
 
 /* ── Primary button ── */
 .stButton > button[kind="primary"] {
-  background: linear-gradient(135deg, #16a34a, #4ade80) !important;
-  color: #0d1117 !important;
-  font-family: 'Bebas Neue', sans-serif !important;
-  font-size: 1.1rem !important;
-  letter-spacing: 0.1em !important;
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 1.0rem !important;
+  font-weight: 500 !important;
   border: none !important;
-  border-radius: 10px !important;
-  padding: 0.6rem 2rem !important;
+  border-radius: var(--radius) !important;
+  padding: 0.5rem 1.5rem !important;
   width: 100% !important;
-  transition: transform 0.15s, box-shadow 0.15s !important;
+  transition: background 0.2s ease !important;
 }
 .stButton > button[kind="primary"]:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 24px rgba(74,222,128,0.35) !important;
+  background: #059669 !important;
 }
 
 /* ── Secondary button ── */
 .stButton > button:not([kind="primary"]) {
-  background: var(--surface) !important;
-  color: var(--green) !important;
-  border: 1px solid var(--green-dim) !important;
-  border-radius: 8px !important;
-  font-family: 'DM Mono', monospace !important;
-  font-size: 0.8rem !important;
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.85rem !important;
+  transition: all 0.2s ease !important;
+}
+.stButton > button:not([kind="primary"]):hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
 }
 
 /* ── Chat input ── */
@@ -116,15 +119,15 @@ html, body, [data-testid="stAppViewContainer"] {
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
   color: var(--text) !important;
-  border-radius: 12px !important;
-  font-family: 'DM Sans', sans-serif !important;
+  border-radius: var(--radius) !important;
+  font-family: 'Inter', sans-serif !important;
 }
 
 /* ── Chat messages ── */
 [data-testid="stChatMessage"] {
   background: var(--surface) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
+  border-radius: var(--radius) !important;
   margin-bottom: 0.5rem !important;
 }
 
@@ -132,9 +135,9 @@ html, body, [data-testid="stAppViewContainer"] {
 hr { border-color: var(--border) !important; }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 99px; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 4px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -142,87 +145,85 @@ hr { border-color: var(--border) !important; }
 # HELPER COMPONENTS
 # ─────────────────────────────────────────────────────────────────────────────
 
-def card(content_html: str, accent: str = "#4ade80", padding: str = "1.4rem"):
+def card(content_html: str, accent: str = "#10b981", padding: str = "1.4rem"):
     st.markdown(f"""
     <div style="
         background:var(--surface);
         border:1px solid var(--border);
-        border-top:3px solid {accent};
+        border-top:2px solid {accent};
         border-radius:var(--radius);
         padding:{padding};
         margin-bottom:0.8rem;
     ">{content_html}</div>""", unsafe_allow_html=True)
 
-def stat_block(label, value, unit="", color="#4ade80", icon=""):
+def stat_block(label, value, unit="", color="#10b981"):
     st.markdown(f"""
     <div style="
-        background:var(--surface2);
+        background:var(--surface);
         border:1px solid var(--border);
-        border-radius:10px;
-        padding:1rem 1.2rem;
-        text-align:center;
+        border-radius:var(--radius);
+        padding:1.2rem;
+        text-align:left;
         height:100%;
     ">
-      <div style="font-size:1.6rem;margin-bottom:4px">{icon}</div>
-      <div style="font-family:'Bebas Neue';font-size:2rem;color:{color};
-                  line-height:1;letter-spacing:0.05em">{value}</div>
-      <div style="font-size:0.65rem;color:#64748b;text-transform:uppercase;
-                  letter-spacing:0.1em;margin-top:4px">{unit}</div>
-      <div style="font-size:0.75rem;color:#94a3b8;margin-top:2px">{label}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;
+                  letter-spacing:0.05em;margin-bottom:4px;font-weight:500">{label}</div>
+      <div style="font-family:'Outfit', sans-serif;font-size:1.8rem;color:{color};
+                  line-height:1;font-weight:600">{value}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);
+                  margin-top:6px">{unit}</div>
     </div>""", unsafe_allow_html=True)
 
 def gis_gauge(score: float):
     score = max(0, min(100, score))
-    color = "#4ade80" if score >= 70 else "#fbbf24" if score >= 40 else "#f87171"
-    label = "EXCELLENT" if score >= 70 else "GOOD" if score >= 40 else "LOW"
+    color = "#10b981" if score >= 70 else "#f59e0b" if score >= 40 else "#ef4444"
+    label = "Optimal" if score >= 70 else "Fair" if score >= 40 else "Critical"
     fill = score * 1.8
 
     st.markdown(f"""
-    <div style="width:100%;display:flex;justify-content:center;margin-top:0.4rem">
-      <div style="position:relative;width:240px;height:132px;overflow:hidden">
+    <div style="width:100%;display:flex;justify-content:center;margin-top:1rem;margin-bottom:0.5rem">
+      <div style="position:relative;width:200px;height:110px;overflow:hidden">
         <div style="
-          width:240px;height:240px;border-radius:50%;
+          width:200px;height:200px;border-radius:50%;
           background:conic-gradient(from 270deg, {color} 0deg {fill:.1f}deg,
-                     #2d3748 {fill:.1f}deg 180deg, transparent 180deg 360deg);
-          filter:drop-shadow(0 0 8px {color}60);
+                     var(--border) {fill:.1f}deg 180deg, transparent 180deg 360deg);
         "></div>
         <div style="
-          position:absolute;left:18px;top:18px;width:204px;height:204px;
+          position:absolute;left:10px;top:10px;width:180px;height:180px;
           border-radius:50%;background:var(--surface);
         "></div>
         <div style="
-          position:absolute;left:0;right:0;top:62px;text-align:center;
-          font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:{color};
-          letter-spacing:0.04em;line-height:1;
+          position:absolute;left:0;right:0;top:45px;text-align:center;
+          font-family:'Outfit',sans-serif;font-size:2.2rem;color:var(--text);
+          font-weight:600;line-height:1;
         ">{score:.1f}</div>
         <div style="
-          position:absolute;left:0;right:0;top:102px;text-align:center;
-          font-size:0.68rem;color:#94a3b8;letter-spacing:0.12em;
+          position:absolute;left:0;right:0;top:85px;text-align:center;
+          font-size:0.7rem;color:{color};font-weight:500;
           text-transform:uppercase;
-        ">/ 100 · {label}</div>
+        ">{label}</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
 
 def confidence_bars(top_crops):
     bars_html = ""
-    colors = ["#4ade80", "#38bdf8", "#fbbf24"]
+    colors = ["#10b981", "#0ea5e9", "#f59e0b"]
     for i, crop in enumerate(top_crops):
         pct   = crop['confidence']
         color = colors[i]
         bars_html += f"""
-        <div style="margin-bottom:10px">
+        <div style="margin-bottom:12px">
           <div style="display:flex;justify-content:space-between;
-                      font-size:0.78rem;margin-bottom:4px">
-            <span style="color:#e2e8f0;text-transform:capitalize;
+                      font-size:0.8rem;margin-bottom:6px">
+            <span style="color:var(--text);text-transform:capitalize;
                          font-weight:{'600' if i==0 else '400'}">
-              {'👑 ' if i==0 else ''}{crop['crop']}
+              {crop['crop']}
             </span>
-            <span style="color:{color};font-family:'DM Mono',monospace">{pct:.1f}%</span>
+            <span style="color:var(--text-muted);font-family:'JetBrains Mono',monospace">{pct:.1f}%</span>
           </div>
-          <div style="background:#2d3748;border-radius:99px;height:6px;overflow:hidden">
-            <div style="width:{pct}%;height:100%;background:{color};border-radius:99px;
-                        box-shadow:0 0 6px {color}80;
+          <div style="background:var(--surface2);border-radius:4px;height:4px;overflow:hidden">
+            <div style="width:{pct}%;height:100%;background:{color};border-radius:4px;
                         transition:width 0.8s ease"></div>
           </div>
         </div>"""
@@ -239,15 +240,15 @@ def feature_importance_chart(fi: dict):
         pct   = (val / max_val) * 100
         label = labels.get(key, key)
         bars_html += f"""
-        <div style="margin-bottom:8px">
+        <div style="margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;font-size:0.75rem;
-                      margin-bottom:3px">
-            <span style="color:#94a3b8">{label}</span>
-            <span style="color:#38bdf8;font-family:'DM Mono',monospace">{val:.3f}</span>
+                      margin-bottom:4px">
+            <span style="color:var(--text-muted)">{label}</span>
+            <span style="color:var(--sky);font-family:'JetBrains Mono',monospace">{val:.3f}</span>
           </div>
-          <div style="background:#1e2a1e;border-radius:99px;height:5px">
-            <div style="width:{pct:.1f}%;height:100%;border-radius:99px;
-                        background:linear-gradient(90deg,#16a34a,#38bdf8)"></div>
+          <div style="background:var(--surface2);border-radius:2px;height:4px">
+            <div style="width:{pct:.1f}%;height:100%;border-radius:2px;
+                        background:var(--sky)"></div>
           </div>
         </div>"""
     return bars_html
@@ -265,33 +266,25 @@ if "analyzed" not in st.session_state: st.session_state.analyzed = False
 st.markdown("""
 <div style="
   display:flex; align-items:center; gap:16px;
-  padding:1.2rem 0 0.6rem 0; border-bottom:1px solid #2d3748;
-  margin-bottom:1.4rem;
+  padding:1rem 0; border-bottom:1px solid var(--border);
+  margin-bottom:1.5rem;
 ">
-  <div style="
-    background:linear-gradient(135deg,#166534,#4ade80);
-    border-radius:14px; width:52px; height:52px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:1.6rem; flex-shrink:0;
-    box-shadow: 0 0 20px rgba(74,222,128,0.3);
-  ">🌾</div>
   <div>
     <div style="
-      font-family:'Bebas Neue',sans-serif; font-size:2.2rem;
-      color:#4ade80; letter-spacing:0.08em; line-height:1;
-    ">AgroSmart AI</div>
-    <div style="font-size:0.75rem; color:#64748b; letter-spacing:0.15em;
-                text-transform:uppercase; margin-top:1px">
-      Climate-Smart Agriculture Assistant  ·  Predict · Optimize · Sustain
+      font-family:'Outfit',sans-serif; font-size:1.8rem; font-weight:600;
+      color:var(--text); letter-spacing:0.02em; line-height:1;
+    ">AgroSmart Platform</div>
+    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px">
+      Climate-Smart Agriculture Analytics & Optimization
     </div>
   </div>
   <div style="margin-left:auto; text-align:right">
     <div style="
-      background:#1e2a1e; border:1px solid #166534;
-      border-radius:99px; padding:4px 14px;
-      font-size:0.7rem; color:#4ade80;
-      font-family:'DM Mono',monospace; letter-spacing:0.08em;
-    ">● LIVE</div>
+      background:transparent; border:1px solid var(--primary-dim);
+      border-radius:4px; padding:4px 10px;
+      font-size:0.7rem; color:var(--primary);
+      font-family:'JetBrains Mono',monospace; font-weight:500;
+    ">SYSTEM ONLINE</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -302,42 +295,42 @@ st.markdown("""
 with st.sidebar:
     st.markdown("""
     <div style="
-      font-family:'Bebas Neue',sans-serif; font-size:1.4rem;
-      color:#4ade80; letter-spacing:0.1em; padding:0.4rem 0 1rem 0;
-      border-bottom:1px solid #2d3748; margin-bottom:1rem;
-    ">⚗️ Farm Parameters</div>
+      font-family:'Outfit',sans-serif; font-size:1.1rem; font-weight:600;
+      color:var(--text); padding:0.4rem 0 1rem 0;
+      border-bottom:1px solid var(--border); margin-bottom:1rem;
+    ">Configuration Parameters</div>
     """, unsafe_allow_html=True)
 
-    st.markdown("<p style='color:#64748b;font-size:0.7rem;margin-bottom:1rem'>SOIL NUTRIENTS (kg/ha)</p>", unsafe_allow_html=True)
-    N = st.slider("Nitrogen (N)",        0,   200, 90,  help="Nitrogen content in soil")
-    P = st.slider("Phosphorus (P)",      5,   145, 42,  help="Phosphorus content in soil")
-    K = st.slider("Potassium (K)",       5,   205, 43,  help="Potassium content in soil")
+    st.markdown("<p style='color:var(--text-muted);font-size:0.7rem;margin-bottom:1rem;text-transform:uppercase'>Soil Nutrients (kg/ha)</p>", unsafe_allow_html=True)
+    N = st.slider("Nitrogen (N)",        0,   200, 90)
+    P = st.slider("Phosphorus (P)",      5,   145, 42)
+    K = st.slider("Potassium (K)",       5,   205, 43)
 
-    st.markdown("<p style='color:#64748b;font-size:0.7rem;margin:1rem 0 0.5rem'>WEATHER CONDITIONS</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:var(--text-muted);font-size:0.7rem;margin:1rem 0 0.5rem;text-transform:uppercase'>Environmental Data</p>", unsafe_allow_html=True)
     temperature = st.slider("Temperature (°C)", 8.0,  44.0, 25.0, 0.1)
     humidity    = st.slider("Humidity (%)",     14.0, 100.0, 82.0, 0.1)
     rainfall    = st.slider("Rainfall (mm)",    20.0, 300.0, 200.0, 1.0)
 
-    st.markdown("<p style='color:#64748b;font-size:0.7rem;margin:1rem 0 0.5rem'>SOIL CHEMISTRY</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:var(--text-muted);font-size:0.7rem;margin:1rem 0 0.5rem;text-transform:uppercase'>Soil Chemistry</p>", unsafe_allow_html=True)
     ph = st.slider("Soil pH",               3.5, 9.5, 6.5, 0.1)
 
-    st.markdown("<p style='color:#64748b;font-size:0.7rem;margin:1rem 0 0.5rem'>LOCATION</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:var(--text-muted);font-size:0.7rem;margin:1rem 0 0.5rem;text-transform:uppercase'>Metadata</p>", unsafe_allow_html=True)
     region = st.selectbox("Region", ["Punjab","Uttar Pradesh","Maharashtra",
                                      "Karnataka","Tamil Nadu","West Bengal",
                                      "Rajasthan","Madhya Pradesh","Andhra Pradesh","Bihar"])
     season = st.selectbox("Season", ["Kharif (June–Oct)","Rabi (Nov–Mar)","Zaid (Mar–Jun)"])
 
     st.markdown("<br>", unsafe_allow_html=True)
-    analyze_btn = st.button("🔍  ANALYZE MY FARM", type="primary")
+    analyze_btn = st.button("Generate Analysis", type="primary")
 
     # Quick presets
-    st.markdown("<p style='color:#64748b;font-size:0.7rem;margin:1.2rem 0 0.4rem'>QUICK PRESETS</p>", unsafe_allow_html=True)
+    st.markdown("<p style='color:var(--text-muted);font-size:0.7rem;margin:1.2rem 0 0.4rem;text-transform:uppercase'>Load Presets</p>", unsafe_allow_html=True)
     col_a, col_b = st.columns(2)
-    rice_preset  = col_a.button("🌾 Rice",   use_container_width=True)
-    wheat_preset = col_b.button("🌿 Wheat",  use_container_width=True)
+    rice_preset  = col_a.button("Rice",   use_container_width=True)
+    wheat_preset = col_b.button("Wheat",  use_container_width=True)
     col_c, col_d = st.columns(2)
-    mango_preset  = col_c.button("🥭 Mango",  use_container_width=True)
-    maize_preset  = col_d.button("🌽 Maize",  use_container_width=True)
+    mango_preset  = col_c.button("Mango",  use_container_width=True)
+    maize_preset  = col_d.button("Maize",  use_container_width=True)
 
 # Apply preset (rebuild sidebar values via session state workaround — use API call directly)
 preset_data = None
@@ -353,7 +346,7 @@ def call_predict(payload: dict):
     try:
         return predict_crop(payload), None
     except ApiClientError as e:
-        return None, f"Error: {e}"
+        return None, f"System Error: {e}"
 
 if analyze_btn or preset_data is not None:
     if preset_data:
@@ -363,8 +356,8 @@ if analyze_btn or preset_data is not None:
                        humidity=humidity, ph=ph, rainfall=rainfall,
                        region=region, season=season)
 
-    with st.spinner("🤖 AI is analyzing your farm data…"):
-        time.sleep(0.4)  # small UX pause feels more "thoughtful"
+    with st.spinner("Processing telemetry..."):
+        time.sleep(0.4)
         result, err = call_predict(payload)
 
     if err:
@@ -381,33 +374,33 @@ if not st.session_state.analyzed:
     # ── Welcome / empty state ──
     st.markdown("""
     <div style="
-      text-align:center; padding:4rem 2rem;
-      border:1px dashed #2d3748; border-radius:20px;
-      background:radial-gradient(ellipse at center,
-        rgba(22,101,52,0.08) 0%, transparent 70%);
+      text-align:center; padding:5rem 2rem;
+      border:1px dashed var(--border); border-radius:var(--radius);
+      background:var(--surface);
     ">
-      <div style="font-size:4rem;margin-bottom:1rem">🌱</div>
-      <div style="font-family:'Bebas Neue';font-size:2rem;color:#4ade80;
-                  letter-spacing:0.1em">READY TO ANALYZE</div>
-      <div style="color:#64748b;font-size:0.9rem;margin-top:0.5rem;max-width:420px;
+      <div style="font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:500;color:var(--text);
+                  margin-bottom:0.5rem">Awaiting Telemetry Data</div>
+      <div style="color:var(--text-muted);font-size:0.9rem;max-width:420px;
                   margin-left:auto;margin-right:auto">
-        Enter your farm parameters in the sidebar and click
-        <strong style='color:#94a3b8'>Analyze My Farm</strong> to get
-        AI-powered crop recommendations with sustainability impact scores.
+        Configure farm parameters in the sidebar and initialize analysis to view predictive intelligence and sustainability metrics.
       </div>
-      <div style="margin-top:2rem;display:flex;justify-content:center;gap:2rem;
+      <div style="margin-top:2.5rem;display:flex;justify-content:center;gap:3rem;
                   flex-wrap:wrap">
-        <div style="text-align:center;color:#64748b;font-size:0.8rem">
-          <div style="font-size:1.5rem">🤖</div>XGBoost ML Model<br>98.66% Accuracy
+        <div style="text-align:center;color:var(--text-muted);font-size:0.8rem">
+          <div style="font-weight:600;color:var(--text);margin-bottom:4px">ML Inference</div>
+          RandomForest Pipeline
         </div>
-        <div style="text-align:center;color:#64748b;font-size:0.8rem">
-          <div style="font-size:1.5rem">💧</div>Water Efficiency<br>Tracking
+        <div style="text-align:center;color:var(--text-muted);font-size:0.8rem">
+          <div style="font-weight:600;color:var(--text);margin-bottom:4px">Water Efficiency</div>
+          Consumption Analytics
         </div>
-        <div style="text-align:center;color:#64748b;font-size:0.8rem">
-          <div style="font-size:1.5rem">🌿</div>Carbon Footprint<br>Calculator
+        <div style="text-align:center;color:var(--text-muted);font-size:0.8rem">
+          <div style="font-weight:600;color:var(--text);margin-bottom:4px">Sustainability</div>
+          Carbon Footprint Tracking
         </div>
-        <div style="text-align:center;color:#64748b;font-size:0.8rem">
-          <div style="font-size:1.5rem">💬</div>AI Chatbot<br>Advisor
+        <div style="text-align:center;color:var(--text-muted);font-size:0.8rem">
+          <div style="font-weight:600;color:var(--text);margin-bottom:4px">LLM Advisor</div>
+          Conversational Interface
         </div>
       </div>
     </div>
@@ -419,22 +412,14 @@ else:
     # ── TOP ROW: 4 quick stats ────────────────────────────────────────────────
     q1, q2, q3, q4 = st.columns(4)
     with q1:
-        stat_block("Recommended Crop", r["recommended_crop"].upper(),
-                   icon="🌾", color="#4ade80")
+        stat_block("Primary Recommendation", r["recommended_crop"].capitalize(), color="var(--primary)")
     with q2:
-        stat_block("ML Confidence",    f"{r['confidence']:.1f}",
-                   unit="percent", icon="🎯", color="#38bdf8")
+        stat_block("Inference Confidence", f"{r['confidence']:.1f}%", unit="Model Certainty", color="var(--sky)")
     with q3:
-        stat_block("Water Saved",
-                   f"{r['water_saved_liters_ha']:,}",
-                   unit="liters / hectare", icon="💧", color="#38bdf8")
+        stat_block("Water Conservation", f"{r['water_saved_liters_ha']:,}", unit="Liters / Hectare", color="var(--sky)")
     with q4:
-        stat_block("Green Impact Score",
-                   f"{r['green_impact_score']}",
-                   unit="out of 100", icon="🏆",
-                   color="#4ade80" if r["green_impact_score"]>=70
-                          else "#fbbf24" if r["green_impact_score"]>=40
-                          else "#f87171")
+        gis_color = "var(--primary)" if r["green_impact_score"] >= 70 else "var(--amber)" if r["green_impact_score"] >= 40 else "var(--red)"
+        stat_block("Sustainability Index", f"{r['green_impact_score']}", unit="Score (0-100)", color=gis_color)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -447,41 +432,41 @@ else:
         <div style="
             background:var(--surface);
             border:1px solid var(--border);
-            border-top:3px solid #4ade80;
+            border-top:2px solid var(--primary);
             border-radius:var(--radius);
             padding:1.4rem;
             margin-bottom:0.8rem;
         ">
-          <div style="font-size:0.65rem;color:#64748b;letter-spacing:0.15em;
-                      text-transform:uppercase;margin-bottom:10px">
-            🤖 ML Prediction  ·  XGBoost
+          <div style="font-size:0.75rem;color:var(--text-muted);
+                      text-transform:uppercase;margin-bottom:12px;font-weight:500">
+            Prediction Analysis
           </div>
-          <div style="font-family:'Bebas Neue';font-size:2.4rem;color:#4ade80;
-                      letter-spacing:0.06em;line-height:1;margin-bottom:4px">
-            {r['recommended_crop'].upper()}
+          <div style="font-family:'Outfit',sans-serif;font-size:2rem;color:var(--text);
+                      font-weight:600;line-height:1;margin-bottom:8px">
+            {r['recommended_crop'].capitalize()}
           </div>
-          <div style="font-size:0.8rem;color:#94a3b8;margin-bottom:16px">
+          <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.5">
             {r['crop_description']}
           </div>
-          <div style="font-size:0.65rem;color:#64748b;letter-spacing:0.1em;
-                      text-transform:uppercase;margin-bottom:8px">TOP 3 CANDIDATES</div>
+          <div style="font-size:0.7rem;color:var(--text-muted);
+                      text-transform:uppercase;margin-bottom:12px;font-weight:500">Candidate Probabilities</div>
           {confidence_bars(r['top_crops'])}
         </div>
         """, unsafe_allow_html=True)
 
         card(f"""
-        <div style="font-size:0.65rem;color:#64748b;letter-spacing:0.15em;
-                    text-transform:uppercase;margin-bottom:10px">
-          🔄 Crop Rotation Advice
+        <div style="font-size:0.75rem;color:var(--text-muted);
+                    text-transform:uppercase;margin-bottom:10px;font-weight:500">
+          Rotation Intelligence
         </div>
-        <div style="font-size:0.85rem;color:#e2e8f0;margin-bottom:6px">
-          <span style="color:#94a3b8">Next season, grow:</span>
-          <strong style="color:#fbbf24;text-transform:capitalize">
+        <div style="font-size:0.9rem;color:var(--text);margin-bottom:6px">
+          Suggested Next Crop:
+          <strong style="color:var(--amber);text-transform:capitalize;font-weight:500">
             &nbsp;{r['next_crop_rotation']}
           </strong>
         </div>
-        <div style="font-size:0.75rem;color:#64748b">{r['rotation_reason']}</div>
-        """, accent="#fbbf24")
+        <div style="font-size:0.8rem;color:var(--text-muted);line-height:1.5">{r['rotation_reason']}</div>
+        """, accent="var(--amber)")
 
     # ────────── MIDDLE: Sustainability Dashboard ──────────────────────────────
     with mid:
@@ -489,14 +474,14 @@ else:
         <div style="
             background:var(--surface);
             border:1px solid var(--border);
-            border-top:3px solid #fbbf24;
+            border-top:2px solid var(--amber);
             border-radius:var(--radius);
             padding:1.4rem;
             margin-bottom:0.8rem;
         ">
-          <div style="font-size:0.65rem;color:#64748b;letter-spacing:0.15em;
-                      text-transform:uppercase;margin-bottom:8px">
-            🏆 Green Impact Score
+          <div style="font-size:0.75rem;color:var(--text-muted);
+                      text-transform:uppercase;margin-bottom:8px;font-weight:500">
+            Environmental Impact
           </div>
         """, unsafe_allow_html=True)
         gis_gauge(r["green_impact_score"])
@@ -505,33 +490,23 @@ else:
         # Water + Carbon split
         w_col, c_col = st.columns(2)
         with w_col:
-            stat_block("Water Saved",
-                       f"{r['water_saved_pct']}%",
-                       unit=f"{r['bathtubs_saved']:,} bathtubs",
-                       icon="💧", color="#38bdf8")
+            stat_block("Efficiency", f"{r['water_saved_pct']}%", unit=f"{r['bathtubs_saved']:,} bathtubs equivalent", color="var(--sky)")
         with c_col:
-            stat_block("CO₂ Reduced",
-                       f"{r['carbon_reduced_kg_ha']}",
-                       unit=f"kg/ha  ·  {r['km_not_driven']:,} km",
-                       icon="🌿", color="#4ade80")
+            stat_block("CO₂ Offset", f"{r['carbon_reduced_kg_ha']}", unit=f"kg/ha ({r['km_not_driven']:,} km)", color="var(--primary)")
 
         # Irrigation technique badge
         st.markdown(f"""
         <div style="
-          background:linear-gradient(135deg,#1e2a1e,#0f1f0f);
-          border:1px solid #166534; border-radius:10px;
-          padding:1rem 1.2rem; margin-top:0.8rem;
-          display:flex; align-items:center; gap:12px;
+          background:var(--surface);
+          border:1px solid var(--border); border-radius:var(--radius);
+          padding:1.2rem; margin-top:0.8rem;
         ">
-          <div style="font-size:1.6rem">💧</div>
-          <div>
-            <div style="font-size:0.65rem;color:#64748b;letter-spacing:0.1em;
-                        text-transform:uppercase">Recommended Irrigation</div>
-            <div style="font-size:0.95rem;color:#4ade80;font-weight:600;
-                        margin-top:2px">{r['irrigation_technique']}</div>
-            <div style="font-size:0.72rem;color:#64748b;margin-top:1px">
-              Saves {r['water_saved_pct']}% water vs flood irrigation
-            </div>
+          <div style="font-size:0.75rem;color:var(--text-muted);
+                      text-transform:uppercase;font-weight:500;margin-bottom:4px">Optimized Irrigation</div>
+          <div style="font-size:1.1rem;color:var(--text);font-weight:500;
+                      margin-bottom:4px">{r['irrigation_technique']}</div>
+          <div style="font-size:0.8rem;color:var(--sky)">
+            Saves {r['water_saved_pct']}% water volume compared to conventional methods.
           </div>
         </div>
         """, unsafe_allow_html=True)
@@ -539,39 +514,37 @@ else:
     # ────────── RIGHT: Practices + Explainability ─────────────────────────────
     with right:
         practices_html = "".join([
-            f'<div style="display:flex;align-items:flex-start;gap:8px;'
-            f'margin-bottom:10px;padding:8px 10px;background:#1e2a1e;'
-            f'border-radius:8px;border-left:3px solid #166534">'
-            f'<span style="color:#4ade80;margin-top:1px">✓</span>'
-            f'<span style="font-size:0.78rem;color:#94a3b8;line-height:1.4">{p}</span>'
+            f'<div style="display:flex;align-items:flex-start;gap:10px;'
+            f'margin-bottom:8px;padding:10px 12px;background:var(--surface2);'
+            f'border-radius:6px;border-left:2px solid var(--primary)">'
+            f'<span style="font-size:0.85rem;color:var(--text);line-height:1.4">{p}</span>'
             f'</div>'
             for p in r["sustainable_practices"]
         ])
         card(f"""
-        <div style="font-size:0.65rem;color:#64748b;letter-spacing:0.15em;
-                    text-transform:uppercase;margin-bottom:10px">
-          🌱 Sustainable Practices
+        <div style="font-size:0.75rem;color:var(--text-muted);
+                    text-transform:uppercase;margin-bottom:12px;font-weight:500">
+          Recommended Protocols
         </div>
         {practices_html}
-        """, accent="#166534")
+        """, accent="var(--primary-dim)")
 
         st.markdown(f"""
         <div style="
             background:var(--surface);
             border:1px solid var(--border);
-            border-top:3px solid #38bdf8;
+            border-top:2px solid var(--sky);
             border-radius:var(--radius);
             padding:1.4rem;
             margin-bottom:0.8rem;
         ">
-          <div style="font-size:0.65rem;color:#64748b;letter-spacing:0.15em;
-                      text-transform:uppercase;margin-bottom:10px">
-            📊 Feature Importance
-            <span style="color:#2d3748;margin-left:6px">— why this crop?</span>
+          <div style="font-size:0.75rem;color:var(--text-muted);
+                      text-transform:uppercase;margin-bottom:12px;font-weight:500">
+            Model Explainability
           </div>
           {feature_importance_chart(r['feature_importances'])}
-          <div style="font-size:0.65rem;color:#2d3748;margin-top:8px;text-align:right">
-            Model accuracy: {r['model_accuracy_pct']}%
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;text-align:right">
+            Validation Accuracy: {r['model_accuracy_pct']}%
           </div>
         </div>
         """, unsafe_allow_html=True)
@@ -580,18 +553,9 @@ else:
     # INPUT SUMMARY STRIP
     # ─────────────────────────────────────────────────────────────────────────
     p = st.session_state.payload
-    st.markdown(f"""
-    <div style="
-      background:var(--surface); border:1px solid var(--border);
-      border-radius:10px; padding:0.8rem 1.4rem;
-      display:flex; flex-wrap:wrap; gap:1.5rem; align-items:center;
-      margin:0.6rem 0 1.2rem;
-    ">
-      <span style="font-size:0.65rem;color:#64748b;letter-spacing:0.1em;
-                   text-transform:uppercase">Your Inputs</span>
-      {''.join([
-        f'<span style="font-family:DM Mono,monospace;font-size:0.72rem;'
-        f'color:#94a3b8"><span style="color:#4ade80">{k.upper()}</span> {v}</span>'
+    summary_items_html = ''.join([
+        f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.8rem;'
+        f'color:var(--text)"><span style="color:var(--text-muted)">{k.upper()}</span> {v}</span>'
         for k, v in [("N",p["N"]),("P",p["P"]),("K",p["K"]),
                      ("Temp",f"{p['temperature']}°C"),
                      ("Humidity",f"{p['humidity']}%"),
@@ -599,7 +563,18 @@ else:
                      ("Rainfall",f"{p['rainfall']}mm"),
                      ("Region",p["region"]),
                      ("Season",p["season"])]
-      ])}
+    ])
+    
+    st.markdown(f"""
+    <div style="
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:var(--radius); padding:1rem 1.4rem;
+      display:flex; flex-wrap:wrap; gap:1.5rem; align-items:center;
+      margin:0.6rem 0 1.2rem;
+    ">
+      <span style="font-size:0.75rem;color:var(--text-muted);
+                   text-transform:uppercase;font-weight:500">Active Profile</span>
+      {summary_items_html}
     </div>
     """, unsafe_allow_html=True)
 
@@ -608,12 +583,11 @@ else:
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="
-  font-family:'Bebas Neue',sans-serif; font-size:1.5rem; color:#4ade80;
-  letter-spacing:0.1em; padding:0.6rem 0 0.3rem;
-  border-top:1px solid #2d3748; margin-top:0.4rem;
-">💬 AgroBot — AI Farming Advisor</div>
-<div style="font-size:0.75rem;color:#64748b;margin-bottom:1rem">
-  Ask about irrigation, fertilizers, crop rotation, pests, sustainability…
+  font-family:'Outfit',sans-serif; font-size:1.2rem; font-weight:600; color:var(--text);
+  padding:1rem 0 0.5rem; border-top:1px solid var(--border); margin-top:1rem;
+">Analytic Assistant Interface</div>
+<div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem">
+  Natural language queries regarding sustainability, agronomy, or prediction rationale.
 </div>
 """, unsafe_allow_html=True)
 
@@ -626,31 +600,28 @@ with chat_col:
         if not st.session_state.messages:
             st.markdown("""
             <div style="
-              text-align:center; padding:1.5rem;
-              border:1px dashed #2d3748; border-radius:12px;
-              color:#64748b; font-size:0.8rem;
+              text-align:center; padding:2rem;
+              border:1px dashed var(--border); border-radius:var(--radius);
+              color:var(--text-muted); font-size:0.9rem; background:var(--surface);
             ">
-              👋 Hi! I'm AgroBot. Ask me anything about your farm.<br>
-              <span style="color:#4ade80">No API key needed</span>
-              — I have built-in smart responses!
+              System initialized. Awaiting user input.
             </div>
             """, unsafe_allow_html=True)
 
         for msg in st.session_state.messages:
-            with st.chat_message(msg["role"],
-                                 avatar="🌾" if msg["role"]=="assistant" else "👨‍🌾"):
+            with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
     # Chat input
-    if prompt := st.chat_input("Ask about your crops, soil, water, sustainability…"):
+    if prompt := st.chat_input("Enter your query here..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
 
         # Call backend /chat
         farm_ctx = st.session_state.result or {}
         try:
-            reply = chat(prompt, farm_ctx).get("reply", "Sorry, I couldn't process that.")
+            reply = chat(prompt, farm_ctx).get("reply", "System fault: Query unprocessable.")
         except ApiClientError:
-            reply = "⚠️ Chatbot backend offline or not yet integrated."
+            reply = "Backend connection failed. System offline."
 
         st.session_state.messages.append({"role": "assistant", "content": reply})
         st.rerun()
@@ -659,30 +630,30 @@ with tip_col:
     st.markdown("""
     <div style="
       background:var(--surface); border:1px solid var(--border);
-      border-radius:12px; padding:1.2rem;
+      border-radius:var(--radius); padding:1.2rem;
     ">
-      <div style="font-size:0.65rem;color:#64748b;letter-spacing:0.1em;
-                  text-transform:uppercase;margin-bottom:10px">
-        💡 Suggested Questions
+      <div style="font-size:0.75rem;color:var(--text-muted);
+                  text-transform:uppercase;margin-bottom:12px;font-weight:500">
+        Suggested Queries
       </div>
     """, unsafe_allow_html=True)
 
     suggestions = [
-        "💧 What irrigation saves most water?",
-        "🌿 How can I reduce carbon footprint?",
-        "🔄 What should I plant next season?",
-        "🧪 How to improve soil nutrients?",
-        "🐛 How to manage pests sustainably?",
-        "📊 Explain my Green Impact Score",
+        "What irrigation saves the most water?",
+        "How can I reduce my carbon footprint?",
+        "Explain the rotation intelligence output.",
+        "How to improve soil nutrient distribution?",
+        "Provide sustainable pest management protocols.",
+        "Breakdown the Green Impact Score.",
     ]
     for s in suggestions:
         if st.button(s, use_container_width=True, key=f"sug_{s[:10]}"):
             st.session_state.messages.append({"role": "user", "content": s})
             farm_ctx = st.session_state.result or {}
             try:
-                reply = chat(s, farm_ctx).get("reply", "Sorry, I couldn't process that.")
+                reply = chat(s, farm_ctx).get("reply", "System fault: Query unprocessable.")
             except ApiClientError:
-                reply = "⚠️ Backend offline or not yet integrated."
+                reply = "Backend connection failed. System offline."
             st.session_state.messages.append({"role": "assistant", "content": reply})
             st.rerun()
 
@@ -691,7 +662,7 @@ with tip_col:
     # Clear chat
     if st.session_state.messages:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🗑️ Clear Chat", use_container_width=True):
+        if st.button("Clear Interface Log", use_container_width=True):
             st.session_state.messages = []
             st.rerun()
 
@@ -700,15 +671,15 @@ with tip_col:
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="
-  border-top:1px solid #2d3748; margin-top:2rem; padding:1rem 0;
+  border-top:1px solid var(--border); margin-top:3rem; padding:1.5rem 0;
   display:flex; justify-content:space-between; align-items:center;
   flex-wrap:wrap; gap:0.5rem;
 ">
-  <div style="font-size:0.7rem;color:#2d3748">
-    AgroSmart AI  ·  Spandan '26  ·  AI Foresight Competition
+  <div style="font-size:0.75rem;color:var(--text-muted)">
+    AgroSmart Analytics Platform  ·  v2.0
   </div>
-  <div style="font-size:0.7rem;color:#2d3748;font-family:'DM Mono',monospace">
-    XGBoost · FastAPI · Streamlit · Claude API
+  <div style="font-size:0.75rem;color:var(--text-muted);font-family:'JetBrains Mono',monospace">
+    Powered by RandomForest & FastAPI
   </div>
 </div>
 """, unsafe_allow_html=True)

@@ -43,7 +43,7 @@ async def chat(request: ChatRequest):
     client = Groq(api_key=GROQ_API_KEY)
     
     dataset_context = get_dataset_context()
-    system_prompt = f"You are AgroBot, a helpful AI farming assistant. Keep your answers brief, encouraging, and friendly. Use emojis.\n\n{dataset_context}"
+    system_prompt = f"You are AgroSmart Analytics AI. Maintain a professional, analytical, and enterprise-grade tone. Do NOT use any emojis. Keep your answers brief and concise.\n\n{dataset_context}"
     context_str = f"Farm Context: {request.farm_context}"
     
     try:
